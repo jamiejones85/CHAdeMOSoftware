@@ -2,12 +2,12 @@
 #define GLOBAL_H_
 
 //set the proper digital pins for these
-#define IN1   6//'start-of-charge' signal, CHAdeMO pin 2
-#define IN2		7//charging ready signal, CHAdeMO pin 10
+#define IN1   7//6//'start-of-charge' signal, CHAdeMO pin 2
+#define IN2		6//7//charging ready signal, CHAdeMO pin 10
 
 #define OUT1	48//'start permission' signal, CHAdeMO pin 4
 #define OUT2  49//contactor relay control
-#define OUT3  50//HV request
+#define OUT3  50//HV request  
 
 typedef struct
 {

@@ -88,8 +88,8 @@ void timer2Int()
 void setup()
 {
   //first thing configure the I/O pins and set them to a sane state
-  pinMode(IN1, INPUT);
-  pinMode(IN2, INPUT);
+  pinMode(IN1, INPUT); //7
+  pinMode(IN2, INPUT_PULLUP);//6
   pinMode(OUT1, OUTPUT);
   pinMode(OUT2, OUTPUT);
   pinMode(OUT3, OUTPUT);
@@ -142,6 +142,30 @@ void setup()
 }
 
 
+void sendStatusToVCU()
+{
+  CAN_FRAME outFrame;
+  outFrame.id = 0x354;
+  outFrame.length = 8;
+
+  outFrame.data.byte[0] = 0x01; //Tell VCU Chademo Active
+  outFrame.data.byte[1] = 0; //not used
+  outFrame.data.byte[2] = 0; //not used
+  outFrame.data.byte[3] = 0; //not used
+  outFrame.data.byte[4] = 0; //not used
+  outFrame.data.byte[5] = 0; //not used
+  outFrame.data.byte[6] = 0; //not used
+  outFrame.data.byte[7] = 0; //not used
+  //CAN.EnqueueTX(outFrame);
+  Can0.sendFrame(outFrame);
+  if (settings.debuggingLevel > 1)
+  {
+    SerialUSB.print(F("CAR: VCU Wake Up"));
+    timestamp();
+  }
+
+}
+
 void loop()
 {
   uint8_t pos;
@@ -185,9 +209,12 @@ void loop()
 
     if (Count >= 50)
     {
+
       Count = 0;
 
       USB();
+
+      sendStatusToVCU();
 
       if (print8Val > 0)
         printSettings();

@@ -84,7 +84,7 @@ void CHADEMO::loop()
         bChademoMode = 1;
         if (chademoState == STOPPED && !bStartedCharge) {
           chademoState = STARTUP;
-          SerialUSB.println(F("Starting Chademo process."));
+            SerialUSB.println(F("Starting Chademo process."));
           carStatus.battOverTemp = 0;
           carStatus.battOverVolt = 0;
           carStatus.battUnderVolt = 0;
@@ -462,8 +462,9 @@ void CHADEMO::handleCANFrame(CAN_FRAME &frame)
 void CHADEMO::sendCANBattSpecs()
 {
   CAN_FRAME outFrame;
-  outFrame.id = CARSIDE_BATT_ID;
+  outFrame.id = CARSIDE_BATT_ID; //0x100
   outFrame.length = 8;
+  outFrame.extended = false;
 
   outFrame.data.byte[0] = 0x00; // Not Used
   outFrame.data.byte[1] = 0x00; // Not Used
@@ -471,7 +472,7 @@ void CHADEMO::sendCANBattSpecs()
   outFrame.data.byte[3] = 0x00; // Not Used
   outFrame.data.byte[4] = lowByte(settings.maxChargeVoltage);
   outFrame.data.byte[5] = highByte(settings.maxChargeVoltage);
-  outFrame.data.byte[6] = (uint8_t)settings.packSizeKWH;
+  outFrame.data.byte[6] = (uint8_t)settings.packSizeKWH; //charged_rate_reference
   outFrame.data.byte[7] = 0; //not used
   //CAN.EnqueueTX(outFrame);
   Can1.sendFrame(outFrame);
@@ -489,8 +490,9 @@ void CHADEMO::sendCANBattSpecs()
 void CHADEMO::sendCANChargingTime()
 {
   CAN_FRAME outFrame;
-  outFrame.id = CARSIDE_CHARGETIME_ID;
+  outFrame.id = CARSIDE_CHARGETIME_ID; //0x101
   outFrame.length = 8;
+  outFrame.extended = false;
 
   outFrame.data.byte[0] = 0x00; // Not Used
   outFrame.data.byte[1] = 0xFF; //not using 10 second increment mode
@@ -515,8 +517,9 @@ void CHADEMO::sendCANStatus()
   uint8_t faults = 0;
   uint8_t status = 0;
   CAN_FRAME outFrame;
-  outFrame.id = CARSIDE_CONTROL_ID;
+  outFrame.id = CARSIDE_CONTROL_ID; //0x102
   outFrame.length = 8;
+  outFrame.extended = false;
 
   if (carStatus.battOverTemp) faults |= CARSIDE_FAULT_OVERT;
   if (carStatus.battOverVolt) faults |= CARSIDE_FAULT_OVERV;
@@ -540,7 +543,7 @@ void CHADEMO::sendCANStatus()
   outFrame.data.byte[3] = askingAmps;
   outFrame.data.byte[4] = faults;
   outFrame.data.byte[5] = status;
-  outFrame.data.byte[6] = (uint8_t)settings.kiloWattHours;
+  outFrame.data.byte[6] = (uint8_t)settings.kiloWattHours; //charged rate
   outFrame.data.byte[7] = 0; //not used
   //CAN.EnqueueTX(outFrame);
   Can1.sendFrame(outFrame);
