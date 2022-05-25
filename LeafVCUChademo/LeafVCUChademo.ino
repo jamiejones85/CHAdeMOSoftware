@@ -5,6 +5,8 @@
 #include <Wire_EEPROM.h>
 #include "globals.h"
 #include "chademo.h"
+#include "SimpBMS.h"
+
 /*
   CHAdeMO code for Damien Maguire's "Leaf VCU" hardware https://evbmw.com/index.php/evbmw-webshop/nissan-built-and-tested-boards/leaf-inverter-controller-fully-built-and-tested
   Converted from ATMega to SAM3X by Isaac Kelly
@@ -98,9 +100,13 @@ void setup()
   digitalWrite(OUT3, LOW);
 
   SerialUSB.begin(115200);//normal port
+  #ifdef WIFI_ENABLED
   Serial2.begin(19200);//wifi port
+  #endif
 
   Sensor.begin(0, 500); //Start ISA object on CAN 0 at 500 kbps
+  simpbms.begin(0);
+  
   Can1.begin(CAN_BPS_500K, 255);
 
   for (int filter = 0; filter < 7; filter++) {
@@ -149,9 +155,9 @@ void sendStatusToVCU()
   outFrame.length = 8;
 
   outFrame.data.byte[0] = 0x01; //Tell VCU Chademo Active
-  outFrame.data.byte[1] = 0; //not used
-  outFrame.data.byte[2] = 0; //not used
-  outFrame.data.byte[3] = 0; //not used
+  outFrame.data.byte[1] = chademo.getState();
+  outFrame.data.byte[2] = chademo.getEVSEStatus().presentCurrent;
+  outFrame.data.byte[3] = chademo.getEVSEStatus().presentVoltage;
   outFrame.data.byte[4] = 0; //not used
   outFrame.data.byte[5] = 0; //not used
   outFrame.data.byte[6] = 0; //not used
@@ -213,7 +219,7 @@ void loop()
       Count = 0;
 
       USB();
-
+      chademo.setStateOfCharge(simpbms.getStateOfCharge());
       sendStatusToVCU();
 
       if (print8Val > 0)
@@ -350,20 +356,21 @@ void ParseCommand() {
 
 
 void checkChargingState() {
+  //JJ Disbled for now, Don't want the ISA sensor resetting, I reset at 100%
   //If the current is negative we are either charging or regenerating.
   //If we are charging we expect a relatively constant current decreasing over
   //a period of time. Ie. a small rate of change of current while charging, throughout the charging period.
-  unsigned long CurrentSecs = CurrentMillis / 1000;
-  if (Current < -2.0 && Current > -20 && Voltage >= settings.targetChargeVoltage) { // Charging or regenerating at less than 20 amps
-    //while we are charging batteries at less than 20 amps we assume if this occurs for longer than 5 minutes
-    //we are charging and not regenerating
-    if (Current > -15 && (CurrentSecs - ChargeTimeRefSecs) > 30) { // have been between 0 and -15 amps for more than 5 minutes
-      //At this point we assume that we have been charging for the last 5 minutes or more prior to hitting -4 amps
-      ResetChargeState();
-      ChargeTimeRefSecs = CurrentSecs;
-    }
-  } else // Normal driving conditions or we don't care. So we keep resetting the reference.
-    ChargeTimeRefSecs = CurrentSecs;
+//  unsigned long CurrentSecs = CurrentMillis / 1000;
+//  if (Current < -2.0 && Current > -20 && Voltage >= settings.targetChargeVoltage) { // Charging or regenerating at less than 20 amps
+//    //while we are charging batteries at less than 20 amps we assume if this occurs for longer than 5 minutes
+//    //we are charging and not regenerating
+//    if (Current > -15 && (CurrentSecs - ChargeTimeRefSecs) > 30) { // have been between 0 and -15 amps for more than 5 minutes
+//      //At this point we assume that we have been charging for the last 5 minutes or more prior to hitting -4 amps
+//      ResetChargeState();
+//      ChargeTimeRefSecs = CurrentSecs;
+//    }
+//  } else // Normal driving conditions or we don't care. So we keep resetting the reference.
+//    ChargeTimeRefSecs = CurrentSecs;
 }
 
 void ResetChargeState() {

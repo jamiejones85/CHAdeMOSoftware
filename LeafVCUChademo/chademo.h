@@ -88,6 +88,7 @@ class CHADEMO
     CHADEMO();
     void setDelayedState(int newstate, uint16_t delayTime);
     CHADEMOSTATE getState();
+    EVSE_STATUS getEVSEStatus();
     void setTargetAmperage(uint8_t t_amp);
     void setTargetVoltage(uint16_t t_volt);
     void loop();
@@ -95,6 +96,7 @@ class CHADEMO
     void handleCANFrame(CAN_FRAME &frame);
     void setChargingFault();
     void setBattOverTemp();
+    void setStateOfCharge(uint8_t stateofcharge);
 
     //these need to be accessed quickly in tight spots so they're public in an attempt at efficiency
     uint8_t bChademoMode; //accessed but not modified in ISR so it should be OK non-volatile
@@ -121,6 +123,7 @@ class CHADEMO
     uint32_t insertionTime;
     uint32_t lastCommTime;
     const uint16_t lastCommTimeout = 1000; //allow up to 1 second of comm fault before getting angry
+    uint8_t soc; //BMS reported SoC
 
     CHADEMOSTATE chademoState;
     CHADEMOSTATE stateHolder;

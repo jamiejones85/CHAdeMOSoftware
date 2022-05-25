@@ -42,6 +42,10 @@ CHADEMOSTATE CHADEMO::getState()
   return chademoState;
 }
 
+EVSE_STATUS CHADEMO::getEVSEStatus() {
+  return evse_status;
+}
+
 void CHADEMO::setTargetAmperage(uint8_t t_amp)
 {
   carStatus.targetCurrent = t_amp;
@@ -472,7 +476,7 @@ void CHADEMO::sendCANBattSpecs()
   outFrame.data.byte[3] = 0x00; // Not Used
   outFrame.data.byte[4] = lowByte(settings.maxChargeVoltage);
   outFrame.data.byte[5] = highByte(settings.maxChargeVoltage);
-  outFrame.data.byte[6] = (uint8_t)settings.packSizeKWH; //charged_rate_reference
+  outFrame.data.byte[6] = (uint8_t)settings.packSizeKWH; //charged_rate_reference (change to SoC from BMS)
   outFrame.data.byte[7] = 0; //not used
   //CAN.EnqueueTX(outFrame);
   Can1.sendFrame(outFrame);
@@ -512,6 +516,10 @@ void CHADEMO::sendCANChargingTime()
 
 }
 
+void CHADEMO::setStateOfCharge(uint8_t stateofcharge) {
+  soc = stateofcharge;
+}
+
 void CHADEMO::sendCANStatus()
 {
   uint8_t faults = 0;
@@ -543,7 +551,7 @@ void CHADEMO::sendCANStatus()
   outFrame.data.byte[3] = askingAmps;
   outFrame.data.byte[4] = faults;
   outFrame.data.byte[5] = status;
-  outFrame.data.byte[6] = (uint8_t)settings.kiloWattHours; //charged rate
+  outFrame.data.byte[6] = (uint8_t)settings.kiloWattHours; //charged rate (change to 100 for use with BMS SoC)
   outFrame.data.byte[7] = 0; //not used
   //CAN.EnqueueTX(outFrame);
   Can1.sendFrame(outFrame);
