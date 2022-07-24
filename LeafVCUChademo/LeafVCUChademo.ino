@@ -92,6 +92,10 @@ void setup()
   //first thing configure the I/O pins and set them to a sane state
   pinMode(IN1, INPUT); //7
   pinMode(IN2, INPUT_PULLUP);//6
+
+  pinMode(CONTACTORPOS, INPUT_PULLUP); //chceck contactor state
+  pinMode(CONTACTORNEG, INPUT_PULLUP);
+
   pinMode(OUT1, OUTPUT);
   pinMode(OUT2, OUTPUT);
   pinMode(OUT3, OUTPUT);
@@ -219,6 +223,12 @@ void loop()
       Count = 0;
 
       USB();
+      if (settings.debuggingLevel > 0) {
+          SerialUSB.print(F("SimpBMS: Soc "));
+          SerialUSB.print(simpbms.getStateOfCharge());
+          SerialUSB.print(F("SimpBMS: Soc "));
+
+      }
       chademo.setStateOfCharge(simpbms.getStateOfCharge());
       sendStatusToVCU();
 
@@ -405,7 +415,11 @@ void outputState() {
   SerialUSB.print (F("IN1"));
   SerialUSB.print (digitalRead(IN1) > 0 ? F(":1 ") : F(":0 "));
   SerialUSB.print (F("IN2"));
-  SerialUSB.print (digitalRead(IN2) > 0 ? F(":1") : F(":0 "));
+  SerialUSB.print (digitalRead(IN2) > 0 ? F(":1 ") : F(":0 "));
+  SerialUSB.print (F("POS"));
+  SerialUSB.print (digitalRead(CONTACTORPOS) > 0 ? F(":Op ") : F(":Cl "));
+  SerialUSB.print (F("NEG"));
+  SerialUSB.print (digitalRead(CONTACTORNEG) > 0 ? F(":Op ") : F(":Cl "));
   SerialUSB.print (F("CHG T: "));
   SerialUSB.println (CurrentMillis / 1000 - ChargeTimeRefSecs);
 }
@@ -543,7 +557,7 @@ void handle_wifi() {
   Serial2.print("v");//dc bus voltage
   Serial2.print(Sensor.Voltage);//voltage derived from ISA shunt
   Serial2.print(",i");//dc current
-  Serial2.print(Sensor.Amperes);//current derived from ISA shunt
+  Serial2.print(Sensor.Amperes * -1);//current derived from ISA shunt
   Serial2.print(",p");//total motor power
   Serial2.print(Sensor.KW);//Power value derived from ISA Shunt
   Serial2.print(",m");//Chademo state

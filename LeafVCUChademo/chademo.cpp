@@ -310,6 +310,7 @@ void CHADEMO::handleCANFrame(CAN_FRAME &frame)
   if (frame.id == EVSE_PARAMS_ID)
   {
     lastCommTime = millis();
+    
     if (chademoState == WAIT_FOR_EVSE_PARAMS) setDelayedState(SET_CHARGE_BEGIN, 100);
     evse_params.supportWeldCheck = frame.data.byte[0];
     evse_params.availVoltage = frame.data.byte[1] + frame.data.byte[2] * 256;
@@ -324,6 +325,7 @@ void CHADEMO::handleCANFrame(CAN_FRAME &frame)
 
     if (settings.debuggingLevel > 1)
     {
+      
       SerialUSB.print(F("EVSE: MaxVoltage: "));
       SerialUSB.print(evse_params.availVoltage);
       SerialUSB.print(F(" Max Current:"));
@@ -331,6 +333,27 @@ void CHADEMO::handleCANFrame(CAN_FRAME &frame)
       SerialUSB.print(F(" Threshold Voltage:"));
       SerialUSB.print(evse_params.thresholdVoltage);
       timestamp();
+    }
+    if (settings.debuggingLevel > 2) {
+//        Serial.print("CAN RX:");
+//      Serial.print(EVSE_PARAMS_ID, HEX);
+//      Serial.print(": ");
+//      Serial.print(frame.data.byte[0], HEX);
+//      Serial.print(" ");
+//      Serial.print(frame.data.byte[1], HEX);
+//      Serial.print(" ");
+//      Serial.print(frame.data.byte[2], HEX);
+//      Serial.print(" ");
+//      Serial.print(frame.data.byte[3], HEX);
+//      Serial.print(" ");
+//      Serial.print(frame.data.byte[4], HEX);
+//      Serial.print(" ");
+//      Serial.print(frame.data.byte[5], HEX);
+//      Serial.print(" ");
+//      Serial.print(frame.data.byte[6], HEX);
+//      Serial.print(" ");
+//      Serial.print(frame.data.byte[7], HEX);
+//      Serial.println();
     }
 
     //if charger cannot provide our requested voltage then GTFO
@@ -360,6 +383,7 @@ void CHADEMO::handleCANFrame(CAN_FRAME &frame)
 
   if (frame.id == EVSE_STATUS_ID)
   {
+   
     lastCommTime = millis();
     if (frame.data.byte[0] > 1) bChademo10Protocol = 1;
     evse_status.presentVoltage = frame.data.byte[1] + 256 * frame.data.byte[2];
@@ -422,6 +446,27 @@ void CHADEMO::handleCANFrame(CAN_FRAME &frame)
       timestamp();
     }
 
+    if (settings.debuggingLevel > 2) {
+//        Serial.print("CAN RX:");
+//      Serial.print(EVSE_STATUS_ID, HEX);
+//      Serial.print(": ");
+//      Serial.print(frame.data.byte[0], HEX);
+//      Serial.print(" ");
+//      Serial.print(frame.data.byte[1], HEX);
+//      Serial.print(" ");
+//      Serial.print(frame.data.byte[2], HEX);
+//      Serial.print(" ");
+//      Serial.print(frame.data.byte[3], HEX);
+//      Serial.print(" ");
+//      Serial.print(frame.data.byte[4], HEX);
+//      Serial.print(" ");
+//      Serial.print(frame.data.byte[5], HEX);
+//      Serial.print(" ");
+//      Serial.print(frame.data.byte[6], HEX);
+//      Serial.print(" ");
+//      Serial.print(frame.data.byte[7], HEX);
+//      Serial.println();
+    }
     //on fault try to turn off current immediately and cease operation
     if ((evse_status.status & 0x1A) != 0) //if bits 1, 3, or 4 are set then we have a problem.
     {
@@ -488,6 +533,28 @@ void CHADEMO::sendCANBattSpecs()
     SerialUSB.print(settings.packSizeKWH);
     timestamp();
   }
+  if (settings.debuggingLevel > 2)
+  {
+//        Serial.print("CAN RX:");
+//      Serial.print(CARSIDE_BATT_ID, HEX);
+//      Serial.print(": ");
+//      Serial.print(outFrame.data.byte[0], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[1], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[2], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[3], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[4], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[5], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[6], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[7], HEX);
+//      Serial.println();
+  }
 
 }
 
@@ -512,6 +579,29 @@ void CHADEMO::sendCANChargingTime()
   {
     SerialUSB.print(F("CAR: Charging Time"));
     timestamp();
+  }
+
+  if (settings.debuggingLevel > 2)
+  {
+//        Serial.print("CAN TX:");
+//      Serial.print(CARSIDE_CHARGETIME_ID, HEX);
+//      Serial.print(": ");
+//      Serial.print(outFrame.data.byte[0], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[1], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[2], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[3], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[4], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[5], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[6], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[7], HEX);
+//      Serial.println();
   }
 
 }
@@ -573,6 +663,28 @@ void CHADEMO::sendCANStatus()
     SerialUSB.print(F(" kWh: "));
     SerialUSB.print(settings.kiloWattHours);
     timestamp();
+  }
+  if (settings.debuggingLevel > 2)
+  {
+//        Serial.print("CAN TX:");
+//      Serial.print(CARSIDE_CONTROL_ID, HEX);
+//      Serial.print(": ");
+//      Serial.print(outFrame.data.byte[0], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[1], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[2], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[3], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[4], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[5], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[6], HEX);
+//      Serial.print(" ");
+//      Serial.print(outFrame.data.byte[7], HEX);
+//      Serial.println();
   }
 
   if (chademoState == RUNNING && askingAmps < carStatus.targetCurrent)
