@@ -12,6 +12,7 @@ enum CHADEMOSTATE
   SET_CHARGE_BEGIN,
   WAIT_FOR_BEGIN_CONFIRMATION,
   CLOSE_CONTACTORS,
+  WAIT_FOR_PRECHARGE,
   RUNNING,
   CEASE_CURRENT,
   WAIT_FOR_ZERO_CURRENT,
@@ -109,6 +110,7 @@ class CHADEMO
     uint8_t askingAmps; //how many amps to ask for. Trends toward targetAmperage
     uint8_t bListenEVSEStatus; //should we pay attention to stop requests and such yet?
     uint8_t bDoMismatchChecks; //should we be checking for voltage and current mismatches?
+    uint8_t bConnectorLocked; //is the EVSE saying the connector is locked
     uint8_t vMismatchCount; //count # of consecutive voltage mismatches. Don't trigger until we get enough
     uint8_t cMismatchCount; //same but for current
     uint8_t vCapCount; //# of EVSE voltage capacity checks that have failed in a row.

@@ -89,7 +89,11 @@ void setup()
 {
   //first thing configure the I/O pins and set them to a sane state
   pinMode(IN1, INPUT); //7
-  pinMode(IN2, INPUT_PULLUP);//6
+  pinMode(IN2, INPUT);//5
+
+  pinMode(CONTACTORPOS, INPUT_PULLUP); //chceck contactor state
+  pinMode(CONTACTORNEG, INPUT_PULLUP);
+  
   pinMode(OUT1, OUTPUT);
   pinMode(OUT2, OUTPUT);
   pinMode(OUT3, OUTPUT);
@@ -398,7 +402,12 @@ void outputState() {
   SerialUSB.print (F("IN1"));
   SerialUSB.print (digitalRead(IN1) > 0 ? F(":1 ") : F(":0 "));
   SerialUSB.print (F("IN2"));
-  SerialUSB.print (digitalRead(IN2) > 0 ? F(":1") : F(":0 "));
+  SerialUSB.print (digitalRead(IN2) > 0 ? F(":1 ") : F(":0 "));
+  SerialUSB.print (F("POS"));
+  SerialUSB.print (digitalRead(CONTACTORPOS) > 0 ? F(":Op ") : F(":Cl "));
+  SerialUSB.print (F("NEG"));
+  SerialUSB.print (digitalRead(CONTACTORNEG) > 0 ? F(":Op ") : F(":Cl "));
+  
   SerialUSB.print (F("CHG T: "));
   SerialUSB.println (CurrentMillis / 1000 - ChargeTimeRefSecs);
 }

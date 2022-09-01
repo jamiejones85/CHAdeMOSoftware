@@ -17,6 +17,7 @@ CHADEMO::CHADEMO()
   bChademoSendRequests = 0;
   bChademoRequest = 0;
   bChademo10Protocol = 0;
+  bConnectorLocked = 0;
   askingAmps = 0;
   bListenEVSEStatus = 0;
   bDoMismatchChecks = 0;
@@ -189,11 +190,17 @@ void CHADEMO::loop()
         if (settings.debuggingLevel > 0) SerialUSB.println(F("CAR:Contactor close."));
         digitalWrite(OUT2, HIGH);
         digitalWrite(OUT3, HIGH);
-        setDelayedState(RUNNING, 50);
+        setDelayedState(WAIT_FOR_PRECHARGE, 50);
         carStatus.contactorOpen = 0; //its closed now
         carStatus.chargingEnabled = 1; //please sir, I'd like some charge
         bStartedCharge = 1;
         mismatchStart = millis();
+        break;
+      case WAIT_FOR_PRECHARGE:
+        if (evse_status.presentVoltage > (Voltage - 50)) {
+          if (settings.debuggingLevel > 0) SerialUSB.println(F("Pre-charge completed"));
+          setDelayedState(RUNNING, 50);
+        }
         break;
       case RUNNING:
         //do processing here by taking our measured voltage, amperage, and SOC to see if we should be commanding something
@@ -357,10 +364,13 @@ void CHADEMO::handleCANFrame(CAN_FRAME &frame)
   if (frame.id == EVSE_STATUS_ID)
   {
     lastCommTime = millis();
-    if (frame.data.byte[0] > 1) bChademo10Protocol = 1;
+    if (frame.data.byte[0] > 1) bChademo10Protocol = 1; //JJ ignore this and stay at 0.9
     evse_status.presentVoltage = frame.data.byte[1] + 256 * frame.data.byte[2];
     evse_status.presentCurrent  = frame.data.byte[3];
     evse_status.status = frame.data.byte[5];
+    bConnectorLocked = (frame.data.byte[5] >> 2) && 0x01;
+
+    
     if (frame.data.byte[6] < 0xFF)
     {
       evse_status.remainingChargeSeconds = frame.data.byte[6] * 10;
