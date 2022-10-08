@@ -5,7 +5,6 @@
 #include <Wire_EEPROM.h>
 #include "globals.h"
 #include "chademo.h"
-#include "SimpBMS.h"
 
 /*
   CHAdeMO code for Damien Maguire's "Leaf VCU" hardware https://evbmw.com/index.php/evbmw-webshop/nissan-built-and-tested-boards/leaf-inverter-controller-fully-built-and-tested
@@ -30,7 +29,10 @@ template<class T> inline Print &operator <<(Print &obj, T arg) {
 #define TARGET_CHARGE_V	160
 #define MIN_CHARGE_A	20
 #define CAPACITY 180
-
+//#define SIMPBMS
+#ifdef SIMPBMS
+#include "SimpBMS.h"
+#endif
 
 const unsigned long Interval = 10;
 unsigned long Time = 0;
@@ -91,11 +93,11 @@ void setup()
 {
   //first thing configure the I/O pins and set them to a sane state
   pinMode(IN1, INPUT); //7
-  pinMode(IN2, INPUT_PULLUP);//6
+  pinMode(IN2, INPUT);//5
 
   pinMode(CONTACTORPOS, INPUT_PULLUP); //chceck contactor state
   pinMode(CONTACTORNEG, INPUT_PULLUP);
-
+  
   pinMode(OUT1, OUTPUT);
   pinMode(OUT2, OUTPUT);
   pinMode(OUT3, OUTPUT);
@@ -109,8 +111,9 @@ void setup()
   #endif
 
   Sensor.begin(0, 500); //Start ISA object on CAN 0 at 500 kbps
+  #ifdef SIMPBMS
   simpbms.begin(0);
-  
+  #endif
   Can1.begin(CAN_BPS_500K, 255);
 
   for (int filter = 0; filter < 7; filter++) {
@@ -224,12 +227,14 @@ void loop()
 
       USB();
       if (settings.debuggingLevel > 0) {
-          SerialUSB.print(F("SimpBMS: Soc "));
-          SerialUSB.print(simpbms.getStateOfCharge());
-          SerialUSB.print(F("SimpBMS: Soc "));
+          // SerialUSB.print(F("SimpBMS: Soc "));
+          // SerialUSB.print(simpbms.getStateOfCharge());
+          // SerialUSB.print(F("SimpBMS: Soc "));
 
       }
+      #ifdef SIMPBMS
       chademo.setStateOfCharge(simpbms.getStateOfCharge());
+      #endif
       sendStatusToVCU();
 
       if (print8Val > 0)

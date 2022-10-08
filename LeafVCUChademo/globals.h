@@ -8,10 +8,12 @@
 #define CONTACTORNEG 8
 #define CONTACTORPOS 9
 
-
 #define OUT1	48//'start permission' signal, CHAdeMO pin 4
 #define OUT2  49//contactor relay control
 #define OUT3  50//HV request  
+
+#define CONTACTORNEG 8
+#define CONTACTORPOS 9
 
 typedef struct
 {
