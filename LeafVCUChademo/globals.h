@@ -3,7 +3,7 @@
 
 //set the proper digital pins for these
 #define IN1   7//6//'start-of-charge' signal, CHAdeMO pin 2
-#define IN2		5//7//charging ready signal, CHAdeMO pin 10
+#define IN2		4//7//charging ready signal, CHAdeMO pin 10
 
 #define OUT1	48//'start permission' signal, CHAdeMO pin 4
 #define OUT2  49//contactor relay control
